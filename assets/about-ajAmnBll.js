@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-B5Qt9EMX.js";Particles.init({selector:".background",color:["#FF0099","#00FFFF"],connectParticles:!0,responsive:[{breakpoint:765,options:{color:["#FFF","#FF0099","#00FFFF"],maxParticles:75,connectParticles:!1}}]});Number.prototype.pad=function(e){for(var t=this.toString();t.length<e;t=0+t);return t};window.setInterval("updateClock()",1);
