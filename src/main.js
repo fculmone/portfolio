@@ -111,7 +111,7 @@ class GameScene extends Phaser.Scene {
       duration: 1000,
       onComplete: () => {
         // Redirect to your webpage
-        window.location.href = "/francesco/"; // Replace with your actual URL
+        window.location.href = "/portfolio/aboutme/"; // Replace with your actual URL
       },
     });
   }
