@@ -159,7 +159,7 @@ class GameScene extends Phaser.Scene {
         title: "Link",
         description: "From The Legend of Zelda",
         frames: 18,
-        scale: 0.2,
+        scale: 0.4,
         x: leftSideX + 60,
         y: startY + 300,
         flipX: false, // Link faces right
@@ -201,7 +201,7 @@ class GameScene extends Phaser.Scene {
         .setScale(char.scale) // Adjust scale as needed
         .setDepth(1);
 
-      sprite.flipX = char.flipX; // Flip the sprite horizontallyßßsßßß
+      sprite.flipX = char.flipX; // Flip the sprite horizontally
 
       // Play the animation
       sprite.play(`${char.name}_anim`);
@@ -521,8 +521,8 @@ class GameScene extends Phaser.Scene {
     });
 
     this.load.spritesheet("link", "assets/anime/link.png", {
-      frameWidth: 500,
-      frameHeight: 583,
+      frameWidth: 250,
+      frameHeight: 292,
     });
 
     this.load.spritesheet("sasuke", "assets/anime/sasuke.png", {
