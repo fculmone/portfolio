@@ -41,6 +41,111 @@ class GameScene extends Phaser.Scene {
     super("scene-game");
     this.player;
     this.cursor;
+    this.lastFootprintTime = 0;
+  }
+
+  // Add welcome popup method
+  showWelcomePopup() {
+    // Use camera's actual view coordinates for fixed positioning
+    const camera = this.cameras.main;
+    const centerX = camera.worldView.x + camera.width / 2;
+    const centerY = camera.worldView.y + camera.height / 2;
+
+    console.log("Creating popup at:", centerX, centerY); // Debug log
+
+    // Create semi-transparent overlay
+    const overlay = this.add
+      .rectangle(centerX, centerY, camera.width, camera.height, 0x000000, 0.7)
+      .setScrollFactor(0)
+      .setDepth(1000);
+
+    // Create popup background
+    const popupBg = this.add
+      .rectangle(centerX, centerY, 450, 300, 0x1a0f3e)
+      .setScrollFactor(0)
+      .setDepth(1001);
+
+    popupBg.setStrokeStyle(3, 0x00ffff);
+
+    // Create welcome text
+    const welcomeText = this.add
+      .text(centerX, centerY - 40, "Welcome to Francesco's Portfolio!", {
+        font: "bold 24px Arial",
+        fill: "#00ffff",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+    console.log("Welcome text created at:", welcomeText.x, welcomeText.y); // Debug log
+
+    // Create instruction text
+    const instructionText = this.add
+      .text(
+        centerX,
+        centerY + 10,
+        isMobileDevice()
+          ? "Use the joystick to move around\nand explore the world!"
+          : "Use WASD or Arrow Keys to move\naround and explore the world!",
+        {
+          font: "16px Arial",
+          fill: "#ffffff",
+          align: "center",
+          lineSpacing: 8,
+        }
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1002);
+
+    // Create close button
+    const closeButton = this.add
+      .rectangle(centerX, centerY + 80, 120, 40, 0x00aa00)
+      .setScrollFactor(0)
+      .setDepth(1002)
+      .setInteractive();
+
+    closeButton.setStrokeStyle(2, 0x00ff00);
+
+    const closeButtonText = this.add
+      .text(centerX, centerY + 80, "Let's Go!", {
+        font: "bold 16px Arial",
+        fill: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(1003);
+
+    // Handle close button click
+    closeButton.on("pointerdown", () => {
+      overlay.destroy();
+      popupBg.destroy();
+      welcomeText.destroy();
+      instructionText.destroy();
+      closeButton.destroy();
+      closeButtonText.destroy();
+    });
+
+    // Add hover effect to close button
+    closeButton.on("pointerover", () => {
+      closeButton.setFillStyle(0x00dd00);
+    });
+    closeButton.on("pointerout", () => {
+      closeButton.setFillStyle(0x00aa00);
+    });
+
+    // Auto-close after 10 seconds
+    // this.time.delayedCall(10000, () => {
+    //   if (overlay.active) {
+    //     overlay.destroy();
+    //     popupBg.destroy();
+    //     welcomeText.destroy();
+    //     instructionText.destroy();
+    //     closeButton.destroy();
+    //     closeButtonText.destroy();
+    //   }
+    // });
   }
 
   // Add this method to your GameScene class
@@ -415,6 +520,236 @@ class GameScene extends Phaser.Scene {
     this.signTextActive = true;
   }
 
+  // Update your isPlayerOnPath() method with this version
+  isPlayerOnPath() {
+    // Define the path areas based on your createPaths method
+    const locations = {
+      center: { x: worldSize.width / 2, y: worldSize.height / 2 },
+      house: { x: worldSize.width / 2 + 204, y: 130 },
+      dogs: { x: worldSize.width - 280, y: worldSize.height / 2 },
+      anime: { x: 300, y: worldSize.height / 2 },
+      gooseForest: { x: worldSize.width / 2, y: worldSize.height - 300 },
+    };
+
+    // Branch point for the house path
+    const dogPathBranch = {
+      x: worldSize.width / 2 + 220,
+      y: worldSize.height / 2,
+    };
+
+    // Path width (2 tiles, each 32px wide/high)
+    const pathWidth = 64;
+    const halfPathWidth = pathWidth / 2;
+
+    // Check each path
+    // Path to dogs (horizontal)
+    if (
+      this.player.y > locations.center.y - halfPathWidth &&
+      this.player.y < locations.center.y + halfPathWidth &&
+      this.player.x > locations.center.x &&
+      this.player.x < locations.dogs.x
+    ) {
+      return true;
+    }
+
+    // Path to anime (horizontal)
+    if (
+      this.player.y > locations.center.y - halfPathWidth &&
+      this.player.y < locations.center.y + halfPathWidth &&
+      this.player.x < locations.center.x &&
+      this.player.x > locations.anime.x
+    ) {
+      return true;
+    }
+
+    // Path to goose forest (vertical)
+    if (
+      this.player.x > locations.center.x - halfPathWidth &&
+      this.player.x < locations.center.x + halfPathWidth &&
+      this.player.y > locations.center.y &&
+      this.player.y < locations.gooseForest.y
+    ) {
+      return true;
+    }
+
+    // Path to house (vertical from center)
+    if (
+      this.player.x > dogPathBranch.x - halfPathWidth &&
+      this.player.x < dogPathBranch.x + halfPathWidth &&
+      this.player.y < locations.center.y && // Player is above center (reversed)
+      this.player.y > locations.house.y // Player is below house (reversed)
+    ) {
+      console.log("On house path");
+      return true;
+    } else {
+      console.log("Not on house path");
+    }
+
+    return false;
+  }
+
+  // Helper method to create a horizontal or vertical path that's two tiles thick
+  createStraightPath(fromX, fromY, toX, toY, isHorizontal) {
+    const tileSize = 16; // Size of each path tile
+    const scale = 2; // Scale factor for the tiles
+    const effectiveTileSize = tileSize * scale;
+
+    if (isHorizontal) {
+      // Horizontal path (two tiles thick)
+      const startX = Math.min(fromX, toX);
+      const endX = Math.max(fromX, toX);
+
+      // Place first row of horizontal path tiles
+      for (let x = startX; x <= endX; x += effectiveTileSize) {
+        this.add
+          .image(x, fromY, "pathtile")
+          .setOrigin(0.5)
+          .setScale(scale)
+          .setDepth(0.6);
+
+        // Add second row below the first row
+        this.add
+          .image(x, fromY + effectiveTileSize, "pathtile")
+          .setOrigin(0.5)
+          .setScale(scale)
+          .setDepth(0.6);
+      }
+    } else {
+      // Vertical path (two tiles thick)
+      const startY = Math.min(fromY, toY);
+      const endY = Math.max(fromY, toY);
+
+      // Place first column of vertical path tiles
+      for (let y = startY; y <= endY; y += effectiveTileSize) {
+        this.add
+          .image(fromX, y, "pathtile")
+          .setOrigin(0.5)
+          .setScale(scale)
+          .setDepth(0.6);
+
+        // Add second column to the right of the first column
+        this.add
+          .image(fromX + effectiveTileSize, y, "pathtile")
+          .setOrigin(0.5)
+          .setScale(scale)
+          .setDepth(0.6);
+      }
+    }
+
+    const semiCircleScale = 2;
+    // Create pixelated semi-circles at path ends
+    if (isHorizontal) {
+      // Get start and end points
+      const startX = Math.min(fromX, toX);
+      const endX = Math.max(fromX, toX);
+      const pathWidth = effectiveTileSize * 2; // Two tiles wide
+
+      // Create left semi-circle (at start of path)
+      for (let i = 0; i < 6; i++) {
+        // Calculate positions for right semi-circle (180-degree arc)
+        const angle = (Math.PI / 5) * i - Math.PI / 2; // Angles from -π/2 to π/2
+        const circleX = startX - Math.cos(angle) * (pathWidth / 4.3);
+        const circleY =
+          fromY + pathWidth / 2 - Math.sin(angle) * (pathWidth / 4.3) - 15;
+
+        this.add
+          .image(circleX, circleY, "pathtile")
+          .setOrigin(0.5)
+          .setScale(semiCircleScale)
+          .setDepth(0.59);
+      }
+
+      // Create right semi-circle (at end of path)
+      for (let i = 0; i < 6; i++) {
+        // Calculate positions for right semi-circle (180-degree arc)
+        const angle = (Math.PI / 5) * i - Math.PI / 2; // Angles from -π/2 to π/2
+        const circleX = endX + Math.cos(angle) * (pathWidth / 4.3);
+        const circleY =
+          fromY + pathWidth / 2 - Math.sin(angle) * (pathWidth / 4.3) - 15;
+
+        this.add
+          .image(circleX, circleY, "pathtile")
+          .setOrigin(0.5)
+          .setScale(semiCircleScale)
+          .setDepth(0.59);
+      }
+    } else {
+      // Vertical path semi-circles
+      const startY = Math.min(fromY, toY);
+      const endY = Math.max(fromY, toY);
+      const pathWidth = effectiveTileSize * 2; // Two tiles wide
+
+      // Create bottom semi-circle (at end of path)
+      for (let i = 0; i < 6; i++) {
+        // Calculate positions for right semi-circle (180-degree arc)
+        const angle = (Math.PI / 5) * i - Math.PI / 2; // Angles from -π/2 to π/2
+        const circleX =
+          fromX + pathWidth / 2 - Math.sin(angle) * (pathWidth / 4.3) - 15;
+        const circleY = endY + Math.cos(angle) * (pathWidth / 4.3);
+
+        this.add
+          .image(circleX, circleY, "pathtile")
+          .setOrigin(0.5)
+          .setScale(semiCircleScale)
+          .setDepth(0.59);
+      }
+    }
+  }
+
+  // Main path creation method with the new layout
+  createPaths() {
+    // Define key locations
+    const locations = {
+      center: { x: worldSize.width / 2, y: worldSize.height / 2 },
+      house: { x: worldSize.width / 2 + 204, y: 130 },
+      dogs: { x: worldSize.width - 280, y: worldSize.height / 2 },
+      anime: { x: 300, y: 200 },
+      gooseForest: { x: worldSize.width / 2, y: worldSize.height - 300 },
+    };
+
+    // Path branch point for house path
+    const dogPathBranch = {
+      x: worldSize.width / 2 + 204,
+      y: worldSize.height / 2,
+    };
+
+    // 1. Horizontal path to the dogs (right)
+    this.createStraightPath(
+      locations.center.x,
+      locations.center.y,
+      locations.dogs.x,
+      locations.center.y,
+      true
+    );
+
+    // 2. Horizontal path to the anime gallery (left)
+    this.createStraightPath(
+      locations.center.x,
+      locations.center.y,
+      locations.anime.x,
+      locations.center.y,
+      true
+    );
+
+    // 4. Vertical path to the goose forest (down)
+    this.createStraightPath(
+      locations.center.x - 16,
+      locations.center.y,
+      locations.center.x,
+      locations.gooseForest.y,
+      false
+    );
+
+    // 5. Vertical path from dog path to house (branch)
+    this.createStraightPath(
+      dogPathBranch.x,
+      dogPathBranch.y,
+      dogPathBranch.x,
+      locations.house.y,
+      false
+    );
+  }
+
   // Add this method to your GameScene class
   placeFlowers() {
     // Define the grass area (avoiding the edges where water and edge tiles are)
@@ -465,6 +800,7 @@ class GameScene extends Phaser.Scene {
     this.load.image("flower1", "assets/world/flower1.png");
     this.load.image("flower2", "assets/world/flower2.png");
     this.load.image("flower3", "assets/world/flower3.png");
+    this.load.image("pathtile", "assets/world/pathtile.jpg");
 
     this.load.image("Korra", "assets/dogs/Korra.png");
     this.load.image("Zelda", "assets/dogs/Zelda.png");
@@ -531,7 +867,96 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  // Add this method to your GameScene class
+  drawPathBounds() {
+    // Define locations using the same coordinates as in createPaths
+    const locations = {
+      center: { x: worldSize.width / 2, y: worldSize.height / 2 },
+      house: { x: worldSize.width / 2 + 204, y: 130 },
+      dogs: { x: worldSize.width - 280, y: worldSize.height / 2 },
+      anime: { x: 300, y: worldSize.height / 2 },
+      gooseForest: { x: worldSize.width / 2, y: worldSize.height - 300 },
+    };
+
+    // Branch point for the house path
+    const dogPathBranch = {
+      x: worldSize.width / 2 + 220,
+      y: worldSize.height / 2,
+    };
+
+    // Path width (2 tiles, each 32px wide/high)
+    const pathWidth = 64;
+    const halfPathWidth = pathWidth / 2;
+
+    // Define colors for each path
+    const colors = {
+      center: 0x00ff00, // green
+      dogs: 0xffff00, // yellow
+      anime: 0xff00ff, // magenta
+      goose: 0x00ffff, // cyan
+      house: 0xff0000, // red (branch path)
+    };
+
+    // Draw horizontal path to dogs
+    this.drawPathBoundary(
+      locations.center.x,
+      locations.center.y - halfPathWidth,
+      locations.dogs.x - locations.center.x,
+      pathWidth,
+      colors.dogs
+    );
+
+    // Draw horizontal path to anime
+    this.drawPathBoundary(
+      locations.anime.x,
+      locations.center.y - halfPathWidth,
+      locations.center.x - locations.anime.x,
+      pathWidth,
+      colors.anime
+    );
+
+    // Draw vertical path to goose forest
+    this.drawPathBoundary(
+      locations.center.x - halfPathWidth,
+      locations.center.y,
+      pathWidth,
+      locations.gooseForest.y - locations.center.y,
+      colors.goose
+    );
+
+    // Draw vertical path from branch to house (HIGHLIGHT THIS)
+    this.drawPathBoundary(
+      dogPathBranch.x - halfPathWidth,
+      dogPathBranch.y,
+      pathWidth,
+      locations.house.y - dogPathBranch.y,
+      colors.house,
+      0.5 // Higher alpha for emphasis
+    );
+
+    // Draw points to show key coordinates
+    this.drawPoint(locations.center.x, locations.center.y, 0xffffff); // white
+    this.drawPoint(dogPathBranch.x, dogPathBranch.y, 0xff0000); // red
+    this.drawPoint(locations.house.x, locations.house.y, 0xff0000); // red
+  }
+
+  // Helper to draw a rectangle boundary
+  drawPathBoundary(x, y, width, height, color, alpha = 0.3) {
+    this.add
+      .rectangle(x, y, width, height)
+      .setOrigin(0, 0)
+      .setStrokeStyle(2, color)
+      .setFillStyle(color, alpha)
+      .setDepth(100);
+  }
+
+  // Helper to draw a point marker
+  drawPoint(x, y, color) {
+    this.add.circle(x, y, 5, color, 1).setDepth(101);
+  }
+
   create() {
+    // this.drawPathBounds();
     if (isMobileDevice()) {
       this.joystick = new JoyStick(
         "joyDiv",
@@ -634,6 +1059,7 @@ class GameScene extends Phaser.Scene {
     }
 
     this.placeFlowers();
+    this.createPaths();
 
     // Add the fountain
     this.anims.create({
@@ -766,7 +1192,7 @@ class GameScene extends Phaser.Scene {
     const zelda = this.physics.add
       .sprite(worldSize.width - 200, worldSize.height / 2 + 30, "Zelda")
       .setOrigin(0.5)
-      .setScale(0.2)
+      .setScale(0.24)
       .setImmovable(true)
       .setDepth(1);
 
@@ -857,11 +1283,14 @@ class GameScene extends Phaser.Scene {
         this.player.setFrame(lastFrameIndex);
       }
     });
+
+    // Create welcome popup after everything is set up
+    this.showWelcomePopup();
   }
 
   update() {
     const speed = 200;
-    console.log(this.stickData);
+    // console.log(this.stickData);
 
     // Reset velocity each frame
     this.player.setVelocity(0);
@@ -869,53 +1298,85 @@ class GameScene extends Phaser.Scene {
       const direction = this.stickData.cardinalDirection;
       // Only move if not centered (C)
       if (direction !== "C") {
-        // Prioritize cardinal directions and prevent diagonal movement
-        // Priority order: North, South, East, West
+        let velocityX = 0;
+        let velocityY = 0;
+        let animation = null;
+
+        // Handle diagonal movement with joystick
         if (direction.includes("N")) {
-          this.player.anims.play("walk_backward", true);
-          this.player.setVelocityY(-speed);
-        } else if (direction.includes("S")) {
-          this.player.anims.play("walk_forward", true);
-          this.player.setVelocityY(speed);
-        } else if (direction.includes("E")) {
-          this.player.anims.play("walk_right", true);
-          this.player.setVelocityX(speed);
-        } else if (direction.includes("W")) {
-          this.player.anims.play("walk_left", true);
-          this.player.setVelocityX(-speed);
+          velocityY = -speed;
+          animation = "walk_backward";
+        }
+        if (direction.includes("S")) {
+          velocityY = speed;
+          animation = "walk_forward";
+        }
+        if (direction.includes("E")) {
+          velocityX = speed;
+          animation = "walk_right";
+        }
+        if (direction.includes("W")) {
+          velocityX = -speed;
+          animation = "walk_left";
+        }
+
+        // Normalize diagonal movement speed
+        if (velocityX !== 0 && velocityY !== 0) {
+          const normalizedSpeed = speed * 0.707; // sqrt(2)/2 ≈ 0.707
+          velocityX = velocityX > 0 ? normalizedSpeed : -normalizedSpeed;
+          velocityY = velocityY > 0 ? normalizedSpeed : -normalizedSpeed;
+        }
+
+        this.player.setVelocity(velocityX, velocityY);
+        if (animation) {
+          this.player.anims.play(animation, true);
         }
       } else {
         // Center position - stop animations
         this.player.anims.stop();
       }
     } else {
-      // Keyboard controls for desktop
+      // Keyboard controls for desktop with diagonal support
       const cursors = this.input.keyboard.createCursorKeys();
+      const wasd = {
+        up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+      };
 
-      if (
-        cursors.up.isDown ||
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown
-      ) {
-        this.player.anims.play("walk_backward", true);
-        this.player.setVelocityY(-speed);
-      } else if (
-        cursors.down.isDown ||
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown
-      ) {
-        this.player.anims.play("walk_forward", true);
-        this.player.setVelocityY(speed);
-      } else if (
-        cursors.left.isDown ||
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown
-      ) {
-        this.player.anims.play("walk_left", true);
-        this.player.setVelocityX(-speed);
-      } else if (
-        cursors.right.isDown ||
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown
-      ) {
-        this.player.anims.play("walk_right", true);
-        this.player.setVelocityX(speed);
+      let velocityX = 0;
+      let velocityY = 0;
+      let animation = null;
+
+      // Check vertical movement
+      if (cursors.up.isDown || wasd.up.isDown) {
+        velocityY = -speed;
+        animation = "walk_backward";
+      } else if (cursors.down.isDown || wasd.down.isDown) {
+        velocityY = speed;
+        animation = "walk_forward";
+      }
+
+      // Check horizontal movement
+      if (cursors.left.isDown || wasd.left.isDown) {
+        velocityX = -speed;
+        animation = "walk_left";
+      } else if (cursors.right.isDown || wasd.right.isDown) {
+        velocityX = speed;
+        animation = "walk_right";
+      }
+
+      // Normalize diagonal movement speed
+      if (velocityX !== 0 && velocityY !== 0) {
+        const normalizedSpeed = speed * 0.707; // sqrt(2)/2 ≈ 0.707
+        velocityX = velocityX > 0 ? normalizedSpeed : -normalizedSpeed;
+        velocityY = velocityY > 0 ? normalizedSpeed : -normalizedSpeed;
+      }
+
+      this.player.setVelocity(velocityX, velocityY);
+      if (animation) {
+        this.player.anims.play(animation, true);
       }
     }
 
@@ -964,6 +1425,90 @@ class GameScene extends Phaser.Scene {
         // Adjust this value as needed
         if (this.animeText) this.animeText.destroy();
         this.animeTextActive = false;
+      }
+    }
+
+    // Check if player is on a path and occasionally add dust effect
+    if (
+      this.time.now > (this.lastFootprintTime || 0) + 150 &&
+      (Math.abs(this.player.body.velocity.x) > 10 ||
+        Math.abs(this.player.body.velocity.y) > 10)
+    ) {
+      // Check if player is on a path tile
+      const isOnPath = this.isPlayerOnPath();
+
+      if (isOnPath) {
+        // Calculate the position at the player's feet based on direction
+        let dustX = this.player.x;
+        let dustY = this.player.y + 15; // Position at the feet
+        let particleCount = 4;
+        let particleSize = { min: 3, max: 6 };
+        let particleSpread = { x: 10, y: 4 }; // More vertical variation for horizontal movement
+        let isVertical = false;
+
+        // Adjust position based on movement direction
+        if (this.player.anims.currentAnim) {
+          const key = this.player.anims.currentAnim.key;
+
+          if (key === "walk_backward") {
+            dustY += 15; // Increased offset when walking up
+            isVertical = true;
+            particleCount = 6; // More particles for vertical movement
+          } else if (key === "walk_left") {
+            dustX += 8; // Increased x-offset for better trailing effect
+            dustY += 10; // Lower the dust to the feet level
+            particleCount = 5; // Increased from 3
+          } else if (key === "walk_right") {
+            dustX -= 8; // Increased x-offset for better trailing effect
+            dustY += 10; // Lower the dust to the feet level
+            particleCount = 5; // Increased from 3
+          } else if (key === "walk_forward") {
+            dustY -= 15; // Increased offset when walking down
+            isVertical = true;
+            particleCount = 6; // More particles for vertical movement
+          }
+        }
+
+        // Adjust particle size and spread for vertical movement
+        if (isVertical) {
+          particleSize = { min: 3, max: 7 };
+          particleSpread = { x: 12, y: 2 };
+        }
+
+        // Create dust cloud particles
+        for (let i = 0; i < particleCount; i++) {
+          const dustParticle = this.add
+            .circle(
+              dustX + Phaser.Math.Between(-particleSpread.x, particleSpread.x),
+              dustY + Phaser.Math.Between(-particleSpread.y, particleSpread.y),
+              Phaser.Math.Between(particleSize.min, particleSize.max),
+              isVertical ? 0xc2a078 : 0xd2b48c, // Slightly darker for vertical
+              Phaser.Math.FloatBetween(
+                isVertical ? 0.4 : 0.3,
+                isVertical ? 0.8 : 0.7
+              )
+            )
+            .setOrigin(0.5)
+            .setDepth(isVertical ? 2.5 : 0.65); // Higher depth for vertical movement
+
+          // Animate the dust particles
+          this.tweens.add({
+            targets: dustParticle,
+            alpha: 0,
+            y:
+              dustY -
+              Phaser.Math.Between(isVertical ? 12 : 8, isVertical ? 20 : 16),
+            x: dustX + Phaser.Math.Between(-15, 15),
+            scale: { from: 1, to: isVertical ? 2.5 : 2 },
+            duration: Phaser.Math.Between(400, 700),
+            ease: "Power2",
+            onComplete: () => {
+              dustParticle.destroy();
+            },
+          });
+        }
+
+        this.lastFootprintTime = this.time.now;
       }
     }
   }
