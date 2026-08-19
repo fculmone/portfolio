@@ -1,5 +1,5 @@
 {
-  "name": "portfolio1",
+  "name": "portfolio",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,5 +13,6 @@
   },
   "dependencies": {
     "phaser": "^3.90.0"
-  }
+  },
+  "description": "Zelda-inspired interactive portfolio built with Phaser"
 }

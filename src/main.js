@@ -1,11 +1,5 @@
 import "./style.css";
-import Phaser, { GameObjects } from "phaser";
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import Phaser from "phaser";
 
 // desktop by default
 // More comprehensive mobile detection
@@ -131,18 +125,6 @@ class GameScene extends Phaser.Scene {
     closeButton.on("pointerout", () => {
       closeButton.setFillStyle(0x00aa00);
     });
-
-    // Auto-close after 10 seconds
-    // this.time.delayedCall(10000, () => {
-    //   if (overlay.active) {
-    //     overlay.destroy();
-    //     popupBg.destroy();
-    //     welcomeText.destroy();
-    //     instructionText.destroy();
-    //     closeButton.destroy();
-    //     closeButtonText.destroy();
-    //   }
-    // });
   }
 
   // Add this method to your GameScene class
@@ -333,10 +315,6 @@ class GameScene extends Phaser.Scene {
         this
       );
 
-      // Hide info when not hovering
-      sprite.on("pointerout", () => {
-        if (this.animeText) this.animeText.destroy();
-      });
     });
   }
 
@@ -861,94 +839,6 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  // Add this method to your GameScene class
-  drawPathBounds() {
-    // Define locations using the same coordinates as in createPaths
-    const locations = {
-      center: { x: worldSize.width / 2, y: worldSize.height / 2 },
-      house: { x: worldSize.width / 2 + 204, y: 130 },
-      dogs: { x: worldSize.width - 280, y: worldSize.height / 2 },
-      anime: { x: 300, y: worldSize.height / 2 },
-      gooseForest: { x: worldSize.width / 2, y: worldSize.height - 300 },
-    };
-
-    // Branch point for the house path
-    const dogPathBranch = {
-      x: worldSize.width / 2 + 220,
-      y: worldSize.height / 2,
-    };
-
-    // Path width (2 tiles, each 32px wide/high)
-    const pathWidth = 64;
-    const halfPathWidth = pathWidth / 2;
-
-    // Define colors for each path
-    const colors = {
-      center: 0x00ff00, // green
-      dogs: 0xffff00, // yellow
-      anime: 0xff00ff, // magenta
-      goose: 0x00ffff, // cyan
-      house: 0xff0000, // red (branch path)
-    };
-
-    // Draw horizontal path to dogs
-    this.drawPathBoundary(
-      locations.center.x,
-      locations.center.y - halfPathWidth,
-      locations.dogs.x - locations.center.x,
-      pathWidth,
-      colors.dogs
-    );
-
-    // Draw horizontal path to anime
-    this.drawPathBoundary(
-      locations.anime.x,
-      locations.center.y - halfPathWidth,
-      locations.center.x - locations.anime.x,
-      pathWidth,
-      colors.anime
-    );
-
-    // Draw vertical path to goose forest
-    this.drawPathBoundary(
-      locations.center.x - halfPathWidth,
-      locations.center.y,
-      pathWidth,
-      locations.gooseForest.y - locations.center.y,
-      colors.goose
-    );
-
-    // Draw vertical path from branch to house (HIGHLIGHT THIS)
-    this.drawPathBoundary(
-      dogPathBranch.x - halfPathWidth,
-      dogPathBranch.y,
-      pathWidth,
-      locations.house.y - dogPathBranch.y,
-      colors.house,
-      0.5 // Higher alpha for emphasis
-    );
-
-    // Draw points to show key coordinates
-    this.drawPoint(locations.center.x, locations.center.y, 0xffffff); // white
-    this.drawPoint(dogPathBranch.x, dogPathBranch.y, 0xff0000); // red
-    this.drawPoint(locations.house.x, locations.house.y, 0xff0000); // red
-  }
-
-  // Helper to draw a rectangle boundary
-  drawPathBoundary(x, y, width, height, color, alpha = 0.3) {
-    this.add
-      .rectangle(x, y, width, height)
-      .setOrigin(0, 0)
-      .setStrokeStyle(2, color)
-      .setFillStyle(color, alpha)
-      .setDepth(100);
-  }
-
-  // Helper to draw a point marker
-  drawPoint(x, y, color) {
-    this.add.circle(x, y, 5, color, 1).setDepth(101);
-  }
-
   create() {
     // Assets are loaded; remove the HTML loading indicator
     document.getElementById("loading")?.remove();
@@ -994,7 +884,6 @@ class GameScene extends Phaser.Scene {
             .setOrigin(0, 0)
             .setScale(2, 2);
           // Play the animation on each water tile
-          const random = getRandomInt(1, 3); // Randomly choose an animation
           waterTile.anims.play("water_anim", true);
         } else {
           // Add grass tile (no collision)
