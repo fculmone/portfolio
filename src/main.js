@@ -47,11 +47,10 @@ class GameScene extends Phaser.Scene {
   // Add welcome popup method
   showWelcomePopup() {
     // Use camera's actual view coordinates for fixed positioning
+    // setScrollFactor(0) UI lives in screen space, so center on the camera size
     const camera = this.cameras.main;
-    const centerX = camera.worldView.x + camera.width / 2;
-    const centerY = camera.worldView.y + camera.height / 2;
-
-    console.log("Creating popup at:", centerX, centerY); // Debug log
+    const centerX = camera.width / 2;
+    const centerY = camera.height / 2;
 
     // Create semi-transparent overlay
     const overlay = this.add
@@ -77,8 +76,6 @@ class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(1002);
-
-    console.log("Welcome text created at:", welcomeText.x, welcomeText.y); // Debug log
 
     // Create instruction text
     const instructionText = this.add
@@ -579,10 +576,7 @@ class GameScene extends Phaser.Scene {
       this.player.y < locations.center.y && // Player is above center (reversed)
       this.player.y > locations.house.y // Player is below house (reversed)
     ) {
-      console.log("On house path");
       return true;
-    } else {
-      console.log("Not on house path");
     }
 
     return false;
@@ -1239,8 +1233,6 @@ class GameScene extends Phaser.Scene {
     // Define dogCollider
     const dogCollider = (player, dog) => {
       if (!dog.isShowingText) {
-        console.log("Dog collision with: " + dog.texture.key);
-
         // Emit hearts at the dog's position
         heartParticleEmmiter.setPosition(dog.x, dog.y);
         heartParticleEmmiter.explode(20, 0, 0);
@@ -1275,6 +1267,15 @@ class GameScene extends Phaser.Scene {
     // Create the house
     this.createHouse();
 
+    // Set up input once (creating key objects every frame in update() is wasteful)
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+    });
+
     //stop animation on key up
     this.input.keyboard.on("keyup", () => {
       if (this.player.anims.currentAnim) {
@@ -1290,7 +1291,6 @@ class GameScene extends Phaser.Scene {
 
   update() {
     const speed = 200;
-    // console.log(this.stickData);
 
     // Reset velocity each frame
     this.player.setVelocity(0);
@@ -1337,13 +1337,8 @@ class GameScene extends Phaser.Scene {
       }
     } else {
       // Keyboard controls for desktop with diagonal support
-      const cursors = this.input.keyboard.createCursorKeys();
-      const wasd = {
-        up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-        down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-        left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-      };
+      const cursors = this.cursors;
+      const wasd = this.wasd;
 
       let velocityX = 0;
       let velocityY = 0;
