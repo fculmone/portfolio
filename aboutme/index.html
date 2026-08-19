@@ -6,14 +6,14 @@
     <title>About — Francesco Culmone</title>
     <meta
       name="description"
-      content="About Francesco Culmone, software developer. Connect on GitHub, LinkedIn, or by email."
+      content="Francesco Culmone — software developer and CS student at the University of Waterloo. Previously at Shopify, KORE Solutions, and Ford."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="About — Francesco Culmone" />
     <meta
       property="og:description"
-      content="About Francesco Culmone, software developer. Connect on GitHub, LinkedIn, or by email."
+      content="Software developer and CS student at the University of Waterloo. Previously at Shopify, KORE Solutions, and Ford."
     />
     <meta
       property="og:url"
@@ -24,6 +24,12 @@
       content="https://fculmone.github.io/portfolio/og-image.jpg"
     />
     <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./style.css" />
     <link
       rel="stylesheet"
@@ -40,60 +46,113 @@
     ></script>
   </head>
   <body>
+    <canvas class="background" aria-hidden="true"></canvas>
     <main>
-      <aside>
-        <a href="mailto:fculmone@uwaterloo.ca" aria-label="Email Francesco"
-          ><i class="fa fa-envelope" aria-hidden="true"></i
-        ></a>
-        <a
-          href="https://www.linkedin.com/in/francesco-culmone/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Francesco's LinkedIn profile"
-          ><i class="fab fa-linkedin" aria-hidden="true"></i
-        ></a>
-        <a
-          href="https://github.com/fculmone"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Francesco's GitHub profile"
-          ><i class="fab fa-github" aria-hidden="true"></i
-        ></a>
-      </aside>
-      <div class="main">
-        <div class="hero">
-          <div class="profile-container">
-            <img
-              src="/profile-image.jpg"
-              alt="Francesco Culmone"
-              class="profile-image"
-              width="200"
-              height="200"
-            />
-            <div class="profile-text">
-              <h1>Hello! I'm Francesco,</h1>
-              <h2>thanks for exploring my portfolio!</h2>
-              <p class="intro-text">
-                Feel free to browse my projects and connect through my socials
-                to learn more about my work.
-              </p>
-              <p class="site-credit">
-                This site is itself one of my projects — a Zelda-inspired world
-                built with
-                <a
-                  href="https://github.com/fculmone/portfolio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Phaser (source on GitHub)</a
-                >.
-              </p>
-            </div>
-          </div>
+      <section class="card">
+        <header class="hero">
+          <img
+            src="/profile-image.jpg"
+            alt="Francesco Culmone"
+            class="profile-image"
+            width="140"
+            height="140"
+          />
+          <h1>Francesco Culmone</h1>
+          <p class="role">Software developer · Toronto</p>
+          <p class="status">
+            <span class="status-dot" aria-hidden="true"></span>
+            Open to new-grad roles — available January 2027
+          </p>
+        </header>
+
+        <p class="bio">
+          I'm a final-year computer science student at the University of
+          Waterloo, most recently a software engineering intern at Shopify
+          working on mobile growth — building experimentation and
+          personalization systems for the Shopify mobile app. Before that I
+          built multi-tenant auth at KORE Solutions, healthcare dashboards at
+          Oak Valley Health, and in-vehicle Android at Ford.
+        </p>
+
+        <h2>Things I've built</h2>
+        <div class="projects">
+          <a
+            class="project"
+            href="https://royaleclanmanager.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h3>
+              Royale Clan Manager
+              <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </h3>
+            <p>
+              Live analytics platform for competitive Clash Royale clans —
+              TypeScript &amp; Next.js, self-hosted and operated end-to-end.
+            </p>
+          </a>
+          <a
+            class="project"
+            href="https://github.com/fculmone/portfolio"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h3>
+              This website
+              <i class="fab fa-github" aria-hidden="true"></i>
+            </h3>
+            <p>
+              A Zelda-inspired explorable world built with Phaser — walk
+              around, pet the dogs, dodge the geese.
+            </p>
+          </a>
         </div>
-        <a href="/portfolio/" class="button">Back to home</a>
-      </div>
+
+        <h2>Toolbox</h2>
+        <ul class="chips">
+          <li>TypeScript</li>
+          <li>Python</li>
+          <li>React / React Native</li>
+          <li>GraphQL</li>
+          <li>Ruby on Rails</li>
+          <li>SQL · BigQuery</li>
+          <li>Docker</li>
+        </ul>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="mailto:fculmone5@gmail.com">
+            <i class="fa fa-envelope" aria-hidden="true"></i> Email
+          </a>
+          <a
+            class="btn"
+            href="https://www.linkedin.com/in/francesco-culmone/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn
+          </a>
+          <a
+            class="btn"
+            href="https://github.com/fculmone"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fab fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </div>
+
+        <a class="back" href="/portfolio/">← Return to the world</a>
+      </section>
+      <p class="site-credit">
+        Built with
+        <a
+          href="https://github.com/fculmone/portfolio"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Phaser — source on GitHub</a
+        >
+      </p>
     </main>
-    <canvas class="background"></canvas>
     <script type="module" src="./script.js"></script>
   </body>
 </html>

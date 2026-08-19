@@ -1,14 +1,15 @@
 Particles.init({
   selector: ".background",
-  color: ["#FF0099", "#00FFFF"],
-  connectParticles: true,
+  color: ["#00FFFF", "#FF0099"],
+  maxParticles: 70,
+  sizeVariations: 3,
+  speed: 0.4,
+  connectParticles: false,
   responsive: [
     {
-      breakpoint: 765,
+      breakpoint: 640,
       options: {
-        color: ["#FFF", "#FF0099", "#00FFFF"],
-        maxParticles: 75,
-        connectParticles: false,
+        maxParticles: 40,
       },
     },
   ],
