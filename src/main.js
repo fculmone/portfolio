@@ -212,8 +212,8 @@ class GameScene extends Phaser.Scene {
       alpha: 1,
       duration: 1000,
       onComplete: () => {
-        // Redirect to your webpage
-        window.location.href = "/portfolio/aboutme/"; // Replace with your actual URL
+        // Redirect to the about page (BASE_URL works in both dev and prod)
+        window.location.href = import.meta.env.BASE_URL + "aboutme/";
       },
     });
   }
@@ -950,7 +950,9 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    // this.drawPathBounds();
+    // Assets are loaded; remove the HTML loading indicator
+    document.getElementById("loading")?.remove();
+
     if (isMobileDevice()) {
       this.joystick = new JoyStick(
         "joyDiv",
@@ -1510,10 +1512,11 @@ class GameScene extends Phaser.Scene {
 }
 
 const config = {
-  type: Phaser.WEBGL,
+  // AUTO falls back to Canvas rendering when WebGL is unavailable
+  type: Phaser.AUTO,
   scale: {
     mode: Phaser.Scale.FIT,
-    parent: "gameCanvas",
+    parent: "app",
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: sizes.width,
     height: sizes.height,

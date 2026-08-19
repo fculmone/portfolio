@@ -130,9 +130,22 @@ a:hover {
   text-align: left;
 }
 
+.site-credit {
+  color: #919191;
+  font-size: 0.9vw;
+  margin-top: 14px;
+  max-width: 600px;
+  text-align: left;
+  padding: 0;
+}
+
 @media screen and (max-width: 576px) {
   .intro-text {
     font-size: 4vw;
+  }
+
+  .site-credit {
+    font-size: 3vw;
   }
 }
 
@@ -212,7 +225,8 @@ a:hover {
   /* Center text elements on mobile */
   .profile-text h1, 
   .profile-text h2,
-  .profile-text .intro-text {
+  .profile-text .intro-text,
+  .profile-text .site-credit {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
